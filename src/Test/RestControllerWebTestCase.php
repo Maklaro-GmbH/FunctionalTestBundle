@@ -241,7 +241,7 @@ abstract class RestControllerWebTestCase extends WebTestCase
         $expectedOutputContentType = match (true) {
             $expectedStatusCode >= Response::HTTP_BAD_REQUEST => $this->getExpectedErrorResponseContentType(),
             $expectedStatusCode === Response::HTTP_NO_CONTENT => null,
-            default => 'application/json'
+            default => $this->getExpectedDefaultResponseContentType(),
         };
 
         // If request contains files we cannot make a JSON request, so we perform a generic one.
@@ -464,6 +464,11 @@ abstract class RestControllerWebTestCase extends WebTestCase
     protected function getExpectedErrorResponseContentType(): string
     {
         return 'application/problem+json';
+    }
+
+    protected function getExpectedDefaultResponseContentType(): string
+    {
+        return 'application/json';
     }
 
     protected function prettifyJson(string $content): string
