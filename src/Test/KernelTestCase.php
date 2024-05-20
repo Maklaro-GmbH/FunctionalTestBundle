@@ -42,6 +42,13 @@ abstract class KernelTestCase extends SymfonyKernelTestCase
     }
 
     /**
+     * Array with the number of request payload content files per test.
+     *
+     * @var array<string,int>
+     */
+    private array $payloadContentFiles = [];
+
+    /**
      * Array with the number of assertions against expected files per test.
      *
      * @var array<string,int>
@@ -256,9 +263,47 @@ abstract class KernelTestCase extends SymfonyKernelTestCase
         return [];
     }
 
-    private function getTestNameForExpectedFiles(): string
+    private function getTestNameForDataFiles(): string
     {
         return $this->name() . ($this->dataName() !== '' ? '-' . $this->dataName() : '');
+    }
+
+    /**
+     * @return array<mixed>
+     */
+    protected function getPayloadFromPhpFile(): array
+    {
+        return require $this->getPayloadContentFile('php');
+    }
+
+    /**
+     * @param non-empty-string $type The file type (php, txt, yaml, etc.).
+     *
+     * @return non-empty-string
+     */
+    protected function getPayloadContentFile(string $type): string
+    {
+        $testName = $this->getTestNameForDataFiles();
+        if (isset($this->payloadContentFiles[$testName])) {
+            $this->payloadContentFiles[$testName]++;
+        } else {
+            $this->payloadContentFiles[$testName] = 1;
+        }
+
+        return $this->getCurrentPayloadContentFile($type);
+    }
+
+    /**
+     * @param non-empty-string $type
+     *
+     * @return non-empty-string
+     */
+    public function getCurrentPayloadContentFile(string $type): string
+    {
+        $testName        = $this->getTestNameForDataFiles();
+        $payloadFileName = $testName . '-' . ($this->payloadContentFiles[$testName] ?? 1);
+
+        return $this->getTestDirectory() . '/Fixtures/data/' . $payloadFileName . '.' . $type;
     }
 
     /**
@@ -270,7 +315,7 @@ abstract class KernelTestCase extends SymfonyKernelTestCase
      */
     protected function getExpectedContentFile(string $type): string
     {
-        $testName = $this->getTestNameForExpectedFiles();
+        $testName = $this->getTestNameForDataFiles();
         if (isset($this->assertionExpectedFiles[$testName])) {
             $this->assertionExpectedFiles[$testName]++;
         } else {
@@ -287,7 +332,7 @@ abstract class KernelTestCase extends SymfonyKernelTestCase
      */
     public function getCurrentExpectedResponseContentFile(string $type): string
     {
-        $testName         = $this->getTestNameForExpectedFiles();
+        $testName         = $this->getTestNameForDataFiles();
         $expectedFileName = $testName . '-' . ($this->assertionExpectedFiles[$testName] ?? 1);
 
         return $this->getTestDirectory() . '/Expected/' . $expectedFileName . '.' . $type;
