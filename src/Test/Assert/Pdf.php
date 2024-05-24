@@ -84,7 +84,10 @@ trait Pdf
             ->setCompressionQuality($pdfToImageConfiguration->compressionQuality)
             ->setResolution($pdfToImageConfiguration->resolution);
 
-//        $pdf->saveAllPagesAsImages($expectedDirectory, 'page-');self::fail('Expected updated.');
+        if (DriverConfigurator::isOutputUpdaterEnabled()) {
+            $pdf->saveAllPagesAsImages($expectedDirectory, 'page-');
+            self::fail('Expected PDF images were updated.');
+        }
 
         for ($i = 1; $i <= $pdf->getNumberOfPages(); $i++) {
             $tempActualImage = Filesystem\create_temporary_file();
