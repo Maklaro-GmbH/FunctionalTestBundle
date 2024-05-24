@@ -83,13 +83,13 @@ abstract class RestControllerWebTestCase extends WebTestCase
         $client->loginUser($user);
     }
 
-    protected function loginAsAdmin(): void
+    protected static function loginAsAdmin(): void
     {
         $user = new InMemoryUser('admin', null, ['ROLE_ADMIN']);
-        $this->loginAs($user);
+        static::loginAs($user);
     }
 
-    protected function loginAs(UserInterface $user): void
+    protected static function loginAs(UserInterface $user): void
     {
         self::$authentication = $user;
     }
